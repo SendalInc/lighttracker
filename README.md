@@ -4,11 +4,11 @@
 
 # Light Tracker
 
-Light Tracker is an example partner software service (PSS) developed by Sendal.  The goal of Light Tracker is to provide context and a simple 'how to' for Sendal partners looking to build PSS software.
+Light Tracker is an example partner software service (PSS) developed by Sendal.  The goal of Light Tracker is to provide a reference implementation and simple 'how to' for Sendal partners looking to integrate their software services with Sendal.
 
 ## What is it?
 
-Light Tracker is an example Partner Software Service developed by Sendal.  LightTracker has the following functions:
+Light Tracker is an example Partner Software Service developed by Sendal.  LightTracker implements the following high-level features:
 
 * Used Sendal's historical data API to provide daily, weekly, and monthly summaries of light usage.  Displays daily and weekly views of the time usage of each light in a home.  
 * Displays a forecast of the next hour light usage based on the Sendal predictive cyber model for each light in the home.
@@ -22,7 +22,7 @@ Light tracker implements the 3 parts of a typical Partner Software Service (PSS)
 
 A primary role of the Interaction Service is to serve UI files to the Sendal mobile app embedded webview.  LightTracker implements a simple React-based UI to display lighting historical and predictive information.
 
-### Interaction Service (IS)
+### Interaction Service (IS) based on Node.js
 
 The LightTracker IS makes use of the Sendalserver middleware to handle requests coming from clients.  The  IS contains the UI files and implements a single API to retrieve LightTracker data from the backend server
 

@@ -1,3 +1,5 @@
 .nfs*
 .project
 .settings
+.DS_Store
+
