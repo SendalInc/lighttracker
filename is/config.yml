@@ -1,0 +1,12 @@
+default:
+  sendalConfiguration: 
+    appServiceName: lighttracker
+    applicationId: <your application ID>
+    softwareServicesId: <your PSS backend ID>
+    stateUpdatesRequired: false
+    httpPort: 8004
+
+  logging:
+    stdout:
+      level: info
+      
