@@ -145,15 +145,20 @@ public class LightTrackerAnomoly implements Serializable {
         } else {
             logger.info("Anomoly detection light on " + updatedState.getStateIdentifier().getDevice());
 
-            // the light is on. We create a new anomoly state detector
-            LightTrackerAnomoly ltAnomoly = new LightTrackerAnomoly();
-            ltAnomoly.setDeviceId(updatedState.getStateIdentifier().getDevice());
-            ltAnomoly.setHomeId(updatedState.getStateIdentifier().getHome());
-            ltAnomoly.setStateIdentifier(updatedState.getStateIdentifier());
-            ltAnomoly.setNextAction(LightTrackerAnomoly.NEXTACTION_INITIALANOMOLYTEST);
-            // don't evaluate right away in case the light is turned off quickly.
-            ltAnomoly.setTimeOfNextActionSecondsInFuture(INITIALEVALUATION_DELAY_SECONDS);
-            lightTrackerAnomolyDao.createLightTrackerAnomoly(ltAnomoly);
+            // the light is on. We create a new anomoly state detector. 
+            // due to configuration updates there's a chance the light is already on.
+            if(lightTrackerAnomolyDao.getLightTrackerAnomoly(updatedState.getStateIdentifier().getDevice()) == null) {
+                LightTrackerAnomoly ltAnomoly = new LightTrackerAnomoly();
+                ltAnomoly.setDeviceId(updatedState.getStateIdentifier().getDevice());
+                ltAnomoly.setHomeId(updatedState.getStateIdentifier().getHome());
+                ltAnomoly.setStateIdentifier(updatedState.getStateIdentifier());
+                ltAnomoly.setNextAction(LightTrackerAnomoly.NEXTACTION_INITIALANOMOLYTEST);
+                // don't evaluate right away in case the light is turned off quickly.
+                ltAnomoly.setTimeOfNextActionSecondsInFuture(INITIALEVALUATION_DELAY_SECONDS);
+                lightTrackerAnomolyDao.createLightTrackerAnomoly(ltAnomoly);
+            } else {
+                logger.warn("Light on entry already exists for " + updatedState.getStateIdentifier().getDevice());
+            }
         }
     }
 

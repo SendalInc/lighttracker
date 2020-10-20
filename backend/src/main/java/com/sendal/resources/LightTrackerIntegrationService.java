@@ -121,7 +121,8 @@ public class LightTrackerIntegrationService {
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
                 // cal.set(Calendar.DATE,1);
-                cal.add(Calendar.DATE, -30);
+                // we query 30+5 days back, which lets us get light stats before the range (in case a light is left on overnight)
+                cal.add(Calendar.DATE, -35);
 
                 Date queryDate = cal.getTime();
                 SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -314,10 +315,13 @@ public class LightTrackerIntegrationService {
     private long calculateLightOnTime(Calendar cal, long currentTimestamp, String deviceId, List<LightTrackerStateHistory> records) {
         long totalMillis = 0;
         long startTimestamp = cal.toInstant().getEpochSecond()*1000; // in millis
+        Date startDate = cal.getTime();
         Integer startingState = null;
         Date lightOnTime = null;
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+        boolean previousReportsFound = false;
 
         // as we scale one can envision more efficent ways to process the data.  The main constraint is making a single call to 
         // SCS for all devices data, which will comingle many devices data into the one array.
@@ -345,6 +349,10 @@ public class LightTrackerIntegrationService {
 
                                 totalMillis += (stateTimestamp - lightOnTime.getTime());
                                 lightOnTime = null;
+                            } else {
+                                // quick on-off or off-on within the same second can be reported 'out of order'
+                                // we currently can't tell which on came first, which can lead to inaccuracies.
+                                logger.debug("Light on when already on at " + record.timestamp);
                             }
                         } else {
                             if (record.stateValue.equals("1")) {
@@ -352,20 +360,31 @@ public class LightTrackerIntegrationService {
 
                                 lightOnTime = date;
                             } else {
-                                // we don't have knowledge of a previous on event, but the first
-                                // event we get is an off. Assume the light has been on since the start of the
-                                // duration.
-                                logger.debug("Light " + deviceId + " off in range with no start at " + record.timestamp + " adding " + (stateTimestamp - startTimestamp));
-
-                                totalMillis += (stateTimestamp - startTimestamp);
+                                if(previousReportsFound == true) {
+                                    // quick on-off or off-on within the same second can be reported 'out of order'
+                                    // we currently can't tell which on came first, which can lead to inaccuracies.
+                                    logger.debug("Light " + deviceId + " off in range with no start at " + record.timestamp + " ignoring");
+                                } else {
+                                    //  a potential corner case of a light left on for days before the start of the range.
+                                    // or when a new light is added and it first reports off state.
+                                    // we will detect it in most cases
+                                    // as we retrieve more data than we need, but here we didn't find it.
+                                    logger.debug("Light " + deviceId + " off in range with no start at "
+                                            + record.timestamp + " ignore as no previous reports found");
+                                }
                             }
                         }
+
+                        previousReportsFound = true;
+
                     } else {
+                        previousReportsFound = true;
+
                         // this date is before, but it may indicate the previous state, so record it in
                         // previous state
                         if (record.stateValue.equals("1")) {
                             logger.debug("Light " + deviceId + " on before start at " + record.timestamp);
-                            lightOnTime = date;
+                            lightOnTime = startDate; // set the start time to the start of the time range.
                         } else {
                             // clear the light on time as the light went off before our test range.
                             logger.debug("Light " + deviceId + " off before start at " + record.timestamp);

@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://unpkg.com/react-select@1.2.1/dist/react-select.css">
     <style>     
         * {
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          user-select: none;
           font-family: Verdana, Geneva, sans-serif;
         }
         :root {
@@ -34,10 +37,6 @@
             font-size:25px;
             color: var(--text-color);
         }
-        .disableUserSelect {
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-        }
         .Label {
             font-weight: bold;
             font-size: 16px;
@@ -52,7 +51,6 @@
             color: var(--text-color);
             text-align: center;
             margin-top: 20px;
-            -webkit-user-select: none;
         }
        
         .UsageSummaryDescription {

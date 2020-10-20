@@ -1,5 +1,4 @@
 import path from 'path';
-const babelPolyfill = require('babel-polyfill');
 const SourceMapSupport = require('source-map-support');
 const fetch = require("node-fetch");
 import {
@@ -14,21 +13,20 @@ import {
     clientContexts,
     sendalServer
 } from 'sendalserver';
+import "regenerator-runtime/runtime.js"
 
 SourceMapSupport.install();
 
 if (process.env.NODE_ENV !== 'production') {
-    const webpack = require('webpack');
-    const webpackDevMiddleware = require('webpack-dev-middleware');
-    const webpackHotMiddleware = require('webpack-hot-middleware');
+    let webpack = require('webpack');
+    let webpackConfig = require('../webpack.config');
+    let compiler = webpack(webpackConfig);
 
-    const config = require('../webpack.config');
-    config.entry.app.push('webpack-hot-middleware/client', 'webpack/hot/only-dev-server');
-    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    expressApp.use(require("webpack-dev-middleware")(compiler, {
+        noInfo: true, publicPath: webpackConfig.output.publicPath
+    }));
 
-    const bundler = webpack(config);
-    expressApp.use(webpackDevMiddleware(bundler, { noInfo: true }));
-    expressApp.use(webpackHotMiddleware(bundler, { log: console.log }));
+    expressApp.use(require("webpack-hot-middleware")(compiler));
 }
 
 expressApp.get("/api/:facility/users/:userid/homes/:homeid/usagesummary", async (req, res) => {

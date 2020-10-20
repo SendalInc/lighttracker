@@ -82,7 +82,6 @@ public class LightTrackerStates {
     public Response stateSubscriptionUpdate(@PathParam("homeid") ObjectId homeId, StateReport updatedState) {
         Response response = Response.ok().build(); // can be replaced below
 
-
         Set<ConstraintViolation<StateReport>> violations = validator.validate(updatedState);
         if(violations.size() > 0) {
             // Validation errors occurred

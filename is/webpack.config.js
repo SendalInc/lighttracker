@@ -1,37 +1,55 @@
 const webpack = require('webpack');
 
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 module.exports = {
+    mode: isDevelopment ? 'development' : 'production',
     entry: {
         app: ['./src/App.jsx'],
-        vendor:['react', 'react-dom', 'react-router-dom', 'react-bootstrap', 'reactstrap'],
-    },
-    output: {
-        path: __dirname + '/static',
-        filename: 'app.bundle.js'
+        vendor: ['webpack-hot-middleware/client', 'react', 'react-dom', 'react-router-dom', 'react-bootstrap', 'reactstrap'],
     },
     plugins: [
-        new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' })
+        // OccurrenceOrderPlugin is needed for webpack 1.x only
+        new webpack.optimize.OccurrenceOrderPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
+        // Use NoErrorsPlugin for webpack 1.x
+        new webpack.NoEmitOnErrorsPlugin()
     ],
+    output: {
+        path: __dirname + '/static',
+        filename: '[name].bundle.js'
+    },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendor',
+                    chunks: 'all'
+                }
+            }
+        }
+    },
     module: {
-        loaders: [
+        rules: [
+            // JavaScript/JSX Files
             {
                 test: /\.jsx$/,
-                loader: 'babel-loader',
-                query: {
-                    presets:['react','es2015']
-                }
+                exclude: /node_modules/,
+                use: ['babel-loader'],
             },
+            // CSS Files
             {
                 test: /\.css$/,
-                include: /node_modules/,
-                loaders: ['style-loader', 'css-loader'],
-            },
+                use: ['style-loader', 'css-loader'],
+            }
         ]
     },
     devServer: {
         port: 8000,
         contentBase:'static',
         host: '127.0.0.1',
+        hot: true,
         proxy: {
             '/api/*': {
                 target: 'http://localhost:3000'

@@ -251,4 +251,172 @@ public class LightTrackerSubscription {
 
         return response;
     }
+
+
+    @POST
+    @Path("/configuration/updated")
+    // currently does not handle de-registering for lights that no longer exist.
+    public Response subscribeHome(@PathParam("homeid") ObjectId homeId) {
+        Response response = Response.ok().build(); // can be replaced below
+
+        logger.info("Received configuration updated for home - " + homeId);
+        // see if we have this subscription already - if so, we update it, else we
+        // create it.
+        LightTrackerSubscriptionRecord ltSubRec = lightTrackerSubscriptionRecordDao.getHomeSubscription(homeId);
+
+        if (ltSubRec != null) {
+            // query the SCS cloud for the new subscription information we need to get
+            // started.
+            // Read lighting configuration and room mapping
+            // GET /api/v1/configurations/ - will be factored for permissions
+            Invocation invocation;
+            Response homeConfigResponse = null;
+
+            synchronized (client) {
+                invocation = client.target(scsEndpoint).path("/api/v1/homes/" + homeId.toString() + "/configuration")
+                        .request().header("Sendal3PSSId", scs3pssId).buildGet();
+            }
+
+            try {
+                homeConfigResponse = invocation.invoke(Response.class);
+
+                if (homeConfigResponse.getStatus() == Status.OK.getStatusCode()) {
+                    ExternalHomeConfiguration homeConfig = homeConfigResponse
+                            .readEntity(ExternalHomeConfiguration.class);
+
+                    ltSubRec.setHomeConfig(homeConfig);
+
+                    // The resulting external home configuration is tailored to us based on the
+                    // defined permissions within
+                    // SCS. We get only the info we are allowed to have.
+
+                    // store or update the configuration of the home.
+
+                    // Light tracker is interested in each light state, each room's light state4,
+                    // and each home's light state.
+                    // create a state registration set for the states.
+
+                    List<StateRegistration> stateRegistrations = new ArrayList<StateRegistration>();
+
+                    if (homeConfig.deviceConfigurations.get("lighting") != null) {
+                        // home lighting summary state
+                        StateRegistration sr = new StateRegistration();
+                        StateIdentifier si = new StateIdentifier();
+                        si.setHome(homeId);
+                        si.setStateName("LightsOn");
+                        sr.setStateIdentifier(si);
+                        stateRegistrations.add(sr);
+
+                        // per-device states
+                        for (ExternalDeviceConfiguration edc : homeConfig.deviceConfigurations.get("lighting")) {
+                            if ((boolean) (((Map<String, Object>) (edc.resourcesConfig.get("lighting")))
+                                    .get("onOff")) == true) {
+                                sr = new StateRegistration();
+                                si = new StateIdentifier();
+                                si.setHome(homeId);
+                                si.setDevice(new ObjectId(edc.deviceId));
+                                si.setResource("lighting");
+                                si.setStateName("isOn");
+                                sr.setStateIdentifier(si);
+                                stateRegistrations.add(sr);
+                            }
+
+                            if ((boolean) (((Map<String, Object>) (edc.resourcesConfig.get("lighting")))
+                                    .get("dimmable")) == true) {
+                                sr = new StateRegistration();
+                                si = new StateIdentifier();
+                                si.setHome(homeId);
+                                si.setDevice(new ObjectId(edc.deviceId));
+                                si.setResource("lighting");
+                                si.setStateName("dimmerLevel");
+                                sr.setStateIdentifier(si);
+                                stateRegistrations.add(sr);
+                            }
+                        }
+
+                        // per-room states
+                        // our permissions in SCS allow us to see only rooms w/lights
+                        for (String roomId : homeConfig.roomConfigurations.keySet()) {
+                            sr = new StateRegistration();
+                            si = new StateIdentifier();
+                            si.setHome(homeId);
+                            si.setRoom(new ObjectId(roomId));
+                            si.setStateName("LightsOn");
+                            sr.setStateIdentifier(si);
+                            stateRegistrations.add(sr);
+                        }
+                    }
+
+                    boolean saveHomeConfig = true;
+
+                    if (stateRegistrations.size() > 0) {
+                        // send the state registration request.
+                        synchronized (client) {
+                            invocation = client.target(scsEndpoint)
+                                    .path("api/v1/homes/" + homeId.toString() + "/states/subscriptions/subscribe")
+                                    .request().header("Sendal3PSSId", scs3pssId)
+                                    .buildPost(Entity.json(stateRegistrations));
+                        }
+
+                        Response stateRegistrationResponse = null;
+
+                        try {
+                            stateRegistrationResponse = invocation.invoke(Response.class);
+
+                            if (stateRegistrationResponse.getStatus() != Status.OK.getStatusCode()) {
+                                saveHomeConfig = false;
+                                logger.error("Cannot subscribe for states -  " + stateRegistrationResponse.getStatus()
+                                        + " - " + stateRegistrationResponse.readEntity(String.class));
+                                response = Response.status(Status.INTERNAL_SERVER_ERROR)
+                                        .entity("Error while subscribing for states - "
+                                                + stateRegistrationResponse.getStatus())
+                                        .type(MediaType.TEXT_PLAIN).build();
+                            }
+
+                        } catch (Exception exception) {
+                            // Output expected ConnectException.
+                            saveHomeConfig = false;
+                            logger.error("Register state exception - " + exception);
+                            response = Response.status(Status.INTERNAL_SERVER_ERROR)
+                                    .entity("Exception while subscribing for states - " + exception)
+                                    .type(MediaType.TEXT_PLAIN).build();
+                        } finally {
+                            if (stateRegistrationResponse != null) {
+                                stateRegistrationResponse.close();
+                            }
+                        }
+                    }
+
+                    if (saveHomeConfig == true) {
+                        lightTrackerSubscriptionRecordDao.updateHomeSubscription(ltSubRec);
+                    }
+                } else {
+                    // no home config was retrieved. this is an error
+                    String responseBody = homeConfigResponse.readEntity(String.class);
+
+                    logger.error(
+                            "Cannot retrieve home config -  " + homeConfigResponse.getStatus() + " - " + responseBody);
+
+                    response = Response.status(homeConfigResponse.getStatus()).entity(responseBody)
+                            .type(MediaType.TEXT_PLAIN).build();
+
+                }
+            } catch (Exception exception) {
+                // Output expected ConnectException.
+                logger.error("Get home config exception - " + exception);
+                response = Response.status(Status.INTERNAL_SERVER_ERROR)
+                        .entity("Exception while sending home config request - " + exception).type(MediaType.TEXT_PLAIN)
+                        .build();
+            } finally {
+                if (homeConfigResponse != null) {
+                    homeConfigResponse.close();
+                }
+            }
+        } else {
+            logger.error("Home is unknown to LT - " + homeId);
+        }
+
+        return response;
+    }
+
 }

@@ -146,7 +146,7 @@ export default class App extends React.Component {
         // in parallel we check to see if the IS server has updated in case we are on this
         // screen for an extended time (reloading should be a rare event)
         fetch(webProtocol + document.location.hostname + ":" + document.location.port
-            + "/api/" + this.props.applicationId
+            + "/api/" + this.state.applicationId
             + "/servertimestamp")
         .then(response => {
             if (response.ok == true) {

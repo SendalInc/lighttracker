@@ -1,5 +1,7 @@
 FROM node:10.19.0
-COPY . /home
+COPY node_modules /home/node_modules
+COPY dist /home/dist
+COPY static /home/static
 COPY config-production.yml /home/config.yml
 RUN date > /home/timestamp.txt
 EXPOSE 8004
