@@ -139,7 +139,7 @@ public class LightTrackerIntegrationService {
 
                 synchronized (client) {
                     invocation = client.target(scsEndpoint)
-                            .path("/api/v1/homes/" + homeId.toString() + "/states/history/devices")
+                            .path("/api/v1/states/history/devices")
                             .queryParam("homeid", homeId)
                             .queryParam("deviceid", deviceArray)                             
                             .queryParam("resource", "lighting")
@@ -210,9 +210,10 @@ public class LightTrackerIntegrationService {
 
                         synchronized (client) {
                             invocation = client.target(scsEndpoint)
-                                    .path("/api/v1/homes/" + homeId.toString() + "/devices/" + deviceConfig.deviceId
+                                    .path("/api/v1/devices/" + deviceConfig.deviceId
                                             + "/models/lighting/on")
-                                    .queryParam("timezone", timeZone).queryParam("numberofminutes", "60")
+                                    .queryParam("timezone", timeZone)
+                                    .queryParam("numberofminutes", "60")
                                     // no starttimer param means use the current time.
                                     .request().header("Sendal3PSSId", scs3pssId).buildGet();
                         }

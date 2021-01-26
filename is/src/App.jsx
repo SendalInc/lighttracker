@@ -274,7 +274,7 @@ export default class App extends React.Component {
                                                 <Table size="sm">
                                                     <tbody>
                                                         <tr>
-                                                            <td className="UsageSummaryDescription">Next Hour Light On Forecast</td>
+                                                            <td className="UsageSummaryDescription">Next Hour Forecast</td>
                                                             <td className="UsageSummaryValue">{utilization}</td>
                                                         </tr>
                                                     </tbody>

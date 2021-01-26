@@ -57,7 +57,7 @@ import com.codahale.metrics.annotation.*;
 @Timed
 @ResponseMetered
 @ExceptionMetered
-@Path("/api/v1/homes/{homeid}/states")
+@Path("/api/v1/states")
 @Produces(MediaType.APPLICATION_JSON)
 public class LightTrackerStates {
     private final Client client;
@@ -79,7 +79,7 @@ public class LightTrackerStates {
 
     @POST
     @Path("/stateupdate")
-    public Response stateSubscriptionUpdate(@PathParam("homeid") ObjectId homeId, StateReport updatedState) {
+    public Response stateSubscriptionUpdate(StateReport updatedState) {
         Response response = Response.ok().build(); // can be replaced below
 
         Set<ConstraintViolation<StateReport>> violations = validator.validate(updatedState);

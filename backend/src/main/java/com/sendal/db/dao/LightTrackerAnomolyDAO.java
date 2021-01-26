@@ -40,11 +40,12 @@ public class LightTrackerAnomolyDAO {
         return lightTrackerAnomoly.getDeviceId();
     }
 
+    /*
     public LightTrackerAnomoly updateLightTrackerAnomoly(LightTrackerAnomoly lightTrackerAnomoly) {
         collection.replaceOne(eq("_id", lightTrackerAnomoly.getDeviceId()), lightTrackerAnomoly);
         return lightTrackerAnomoly;
     }
-
+*/
     public LightTrackerAnomoly updateLightTrackerAnomoly(ObjectId deviceId, double previousOlock, double olock, String nextAction, Long timeOfNextAction) {
         LightTrackerAnomoly lightTrackerAnomoly = null;
 

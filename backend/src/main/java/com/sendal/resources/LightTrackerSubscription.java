@@ -186,7 +186,7 @@ public class LightTrackerSubscription {
                         synchronized (client) {
                             invocation = client
                                 .target(scsEndpoint)
-                                .path("api/v1/homes/"+homeId.toString()+"/states/subscriptions/subscribe")
+                                .path("api/v1/states/subscriptions/subscribe")
                                 .request()
                                 .header("Sendal3PSSId", scs3pssId)
                                 .buildPost(Entity.json(stateRegistrations));
@@ -353,7 +353,7 @@ public class LightTrackerSubscription {
                         // send the state registration request.
                         synchronized (client) {
                             invocation = client.target(scsEndpoint)
-                                    .path("api/v1/homes/" + homeId.toString() + "/states/subscriptions/subscribe")
+                                    .path("api/v1/states/subscriptions/subscribe")
                                     .request().header("Sendal3PSSId", scs3pssId)
                                     .buildPost(Entity.json(stateRegistrations));
                         }
