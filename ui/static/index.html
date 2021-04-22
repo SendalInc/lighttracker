@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="UTF=8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <title>Light Tracker PSS</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/react-select@1.2.1/dist/react-select.css">
+    <style>     
+        * {
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          user-select: none;
+          font-family: Verdana, Geneva, sans-serif;
+        }
+        :root {
+            --text-color:#3E4147;
+            --active-badge:#9D4618;
+            --button-pressed-highlight:#bcbcbc;
+            --background-color: #d4d4d4;
+        }
+        body {
+            background-color: var(--background-color);
+        }
+        #close-image img {
+            display: block;
+            height: 25px;  
+            width: 20px;
+        }
+        #close-text {
+            font-size:25px;
+            color: var(--text-color);
+            width: 55px;
+        }
+        #status-text {
+            font-size:25px;
+            color: var(--text-color);
+        }
+        .Label {
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--text-color);
+            text-align: left;
+            margin-left: 5%;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+        }
+        .PageHeader {
+            font-size: 30px;
+            color: var(--text-color);
+            text-align: center;
+            margin-top: 20px;
+        }
+       
+        .UsageSummaryDescription {
+            text-align: left;
+            border: none;
+        }
+        .UsageSummaryValue {
+            text-align: left;
+            border: none;
+        }
+        .UsageSummaryTable {
+          align: center;
+          margin-left: 3%;
+          margin-right: 10%;
+          width: 50%;
+        }
+        .PredictionTable {
+          align: center;
+          margin-left: 5%;
+          margin-right: 5%;
+        }
+        .LoadingSpinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            margin-top: -37px;
+            margin-left: -37px;
+        }
+        .ScopeTabs {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 10px;
+        }
+        
+        .nav-link.active {
+            color: var(--background-color) !important;
+            background-color: var(--text-color) !important;
+        }
+        .nav-link {
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+        .LightSeparator {
+            color: 'black';
+            height: 5px;
+            width: 94%;
+        }
+        .table>tbody>tr>td,
+        .table>tbody>tr>th {
+            border-top: none;
+        }
+        
+        .tab-content.panel
+        {
+            border-top: none; 
+            border-top-left-radius: 0px; 
+            border-top-right-radius: 0px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="contents"></div>
+    <script src="vendor.bundle.js"></script>
+    <script src="app.bundle.js"></script>
+</body>
+
+</html>

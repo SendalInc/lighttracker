@@ -1,0 +1,44 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8000
+  adminConnectors:
+    - type: http
+      port: 8900
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+      threshold: INFO
+      queueSize: 512
+      discardingThreshold: 0
+      timeZone: UTC
+      target: stdout
+      
+jerseyClient:
+  timeout: 10000ms
+  connectionTimeout: 10000ms
+  connectionRequestTimeout: 10000ms
+  minThreads: 1
+  maxThreads: 128
+  workQueueSize: 8
+  gzipEnabled: false
+  gzipEnabledForRequests: false
+  chunkedEncodingEnabled: false
+
+mongo:
+    uri: mongodb://mongoserver:27017/?&w=majority&wtimeoutMS=5000
+    database: 3psslighttracker
+
+sendalSoftwareService:
+    scs3pssId: <your pssId>
+    apiKey: <your pss apiKey>
+    secretKey: <your pssSecret key>
+    scsUrl: https://pssapi.sendal.tech
+
+# type are 1 through 3 as documented on the developer site
+# type 1 - local development
+# type 2 - personal deployment
+# type 3 - production deployment
+lightTrackerDeploymentPhase: 1
