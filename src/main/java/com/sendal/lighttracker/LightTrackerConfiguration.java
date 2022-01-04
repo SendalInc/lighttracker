@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sendal.lighttracker.SendalSoftwareServiceConfiguration;
+import com.sendal.common.pss.SendalSoftwareServiceConfiguration;
 
 import io.dropwizard.client.JerseyClientConfiguration;
 

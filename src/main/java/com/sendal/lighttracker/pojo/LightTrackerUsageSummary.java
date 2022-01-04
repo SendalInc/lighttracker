@@ -1,6 +1,14 @@
-package com.sendal.lighttracker;
+package com.sendal.lighttracker.pojo;
 
 import java.io.Serializable;
+import org.bson.types.ObjectId;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.List;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
 
 //
 // Used to represent data returned to the IS about light usage summaries.

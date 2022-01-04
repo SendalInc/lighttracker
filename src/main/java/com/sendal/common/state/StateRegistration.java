@@ -1,11 +1,11 @@
-package com.sendal.common;
+package com.sendal.common.state;
 
 import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.bson.types.ObjectId;
 
-import com.sendal.common.StateIdentifier;
+import com.sendal.common.state.StateIdentifier;
 
 import org.bson.codecs.pojo.annotations.*;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;

@@ -60,6 +60,19 @@ If you want to use you own development environment, you must ensure the followin
 * Node.js package manager (npm) (https://npmjs.org)
 
 
+## Unit Testing
+Unit tests can be invoked from Maven.  Unit tests depend on a locally running instance of Mongo accessible openly (i.e. no passwords) on 127.0.0.1:27017
+
+```
+mvn clean test
+```
+
+Unit test coverage can be seen using Clover by running:
+```
+mvn clean clover:setup test clover:aggregate clover:clover
+```
+
+Open the target/site/clover/index.html to see the coverage report.
 
 ## Build Light Tracker
 
@@ -82,7 +95,7 @@ The resulting bundle.js files are placed in the lighttracker/ui/static directory
 To build the backend server, use maven to build the Java code.  From the light tracker root directory run the following command.
 
 ```
-mvn clean package
+mvn clean package -DskipTests
 ```
 
 The resulting jar file is created - lighttracker/target/lighttracker-1.0-SNAPSHOT.jar

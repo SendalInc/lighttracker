@@ -1,0 +1,41 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8000
+  adminConnectors:
+    - type: http
+      port: 8900
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+      threshold: TRACE
+      queueSize: 512
+      discardingThreshold: 0
+      timeZone: UTC
+      target: stdout
+      
+jerseyClient:
+  timeout: 10000ms
+  connectionTimeout: 10000ms
+  connectionRequestTimeout: 10000ms
+  minThreads: 1
+  maxThreads: 1024
+  workQueueSize: 8
+  gzipEnabled: false
+  gzipEnabledForRequests: false
+  chunkedEncodingEnabled: false
+
+mongo:
+    uri: mongodb://127.0.0.1:27017/?&w=majority&wtimeoutMS=5000
+    database: 3psslighttrackertest
+
+# test only IDs and keys
+sendalSoftwareService:
+    scs3pssId: 61d4c1a7f896ac4805789d8a
+    apiKey: c5645d61-389a-486e-a5a8-6a46a39ff877
+    secretKey: BcQJ9Z7WwOlyxyQYXX6RVRMYZ244QERi
+    scsUrl: http://localhost:3000
+
+lightTrackerDeploymentPhase: 1

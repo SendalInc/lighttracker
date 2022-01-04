@@ -1,9 +1,15 @@
 package com.sendal.lighttracker.db.dao;
 
+import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.sendal.lighttracker.db.LightTrackerSubscriptionRecord;
 
+import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.IndexOptions;
+import org.bson.Document;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;

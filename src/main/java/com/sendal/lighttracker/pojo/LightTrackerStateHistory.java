@@ -1,4 +1,4 @@
-package com.sendal.lighttracker.db;
+package com.sendal.lighttracker.pojo;
 
 import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

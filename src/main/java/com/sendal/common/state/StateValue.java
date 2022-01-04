@@ -1,5 +1,5 @@
 
-package com.sendal.common;
+package com.sendal.common.state;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

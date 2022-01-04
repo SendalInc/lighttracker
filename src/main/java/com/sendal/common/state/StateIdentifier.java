@@ -1,4 +1,4 @@
-package com.sendal.common;
+package com.sendal.common.state;
 
 import java.io.Serializable;
 import org.bson.types.ObjectId;

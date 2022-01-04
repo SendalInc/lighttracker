@@ -9,37 +9,59 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response;
+import javax.annotation.PostConstruct;
 import javax.validation.Validator;
+import javax.validation.ConstraintViolation;
 
-import com.sendal.common.StateValue;
+import com.sendal.common.state.StateIdentifier;
+import com.sendal.common.state.StateValue;
+import com.sendal.common.olock.OLockFailureException;
 
+import io.dropwizard.auth.Auth;
 import org.bson.types.ObjectId;
 
+import io.dropwizard.client.JerseyClientBuilder;
+
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Set;
+import java.util.HashSet;
+import java.io.InputStream;
 
-import com.sendal.lighttracker.db.LightTrackerStateHistory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sendal.lighttracker.pojo.LightTrackerStateHistory;
+import com.sendal.lighttracker.pojo.LightTrackerReportedAnomaly;
 import com.sendal.lighttracker.db.LightTrackerSubscriptionRecord;
 import com.sendal.lighttracker.db.dao.LightTrackerSubscriptionRecordDAO;
+import com.sendal.lighttracker.db.dao.LightTrackerAnomalyDAO;
+import com.sendal.lighttracker.db.LightTrackerAnomaly;
 
-import com.sendal.lighttracker.LightTrackerUsageSummary;
+import com.sendal.lighttracker.pojo.LightTrackerUsageSummary;
 
-import com.sendal.externalapicommon.ExternalDeviceConfiguration;
+import com.sendal.common.coredb.DBPermissions;
+import com.sendal.common.state.StateReport;
 
 import com.sendal.externalapicommon.security.IDPrincipal;
-import io.dropwizard.auth.Auth;
+import com.sendal.externalapicommon.ExternalHomeConfiguration;
+import com.sendal.externalapicommon.ExternalDeviceConfiguration;
+import com.sendal.externalapicommon.ExternalRoomConfiguration;
 
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.TimeZone;
 import java.util.Date;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import com.codahale.metrics.annotation.*;
 
-// this interface is accessed by Sendal's cloud for supporting the UI
+// this interface is accessed directly by IS supporting the UI
 @Timed
 @ResponseMetered
 @ExceptionMetered
@@ -49,16 +71,19 @@ public class LightTrackerIntegrationService {
     private final Client client;
     private final Validator validator;
     private final LightTrackerSubscriptionRecordDAO lightTrackerSubscriptionRecordDao;
+    private final LightTrackerAnomalyDAO lightTrackerAnomalyDao;
     private final String scsEndpoint;
     private final String scs3pssId;
     private final Logger logger = LoggerFactory.getLogger(LightTrackerIntegrationService.class);
 
-    public LightTrackerIntegrationService(Client client, LightTrackerSubscriptionRecordDAO lightTrackerSubscriptionRecordDao, String scsEndpoint, String scs3pssId, Validator validator) {
+
+    public LightTrackerIntegrationService(Client client, LightTrackerSubscriptionRecordDAO lightTrackerSubscriptionRecordDao, LightTrackerAnomalyDAO lightTrackerAnomalyDao, String scsEndpoint, String scs3pssId, Validator validator) {
         this.client = client;
         this.validator = validator;
         this.scsEndpoint = scsEndpoint;
         this.scs3pssId = scs3pssId;
         this.lightTrackerSubscriptionRecordDao = lightTrackerSubscriptionRecordDao;
+        this.lightTrackerAnomalyDao = lightTrackerAnomalyDao;
     }
 
     @GET
@@ -120,7 +145,6 @@ public class LightTrackerIntegrationService {
                             .queryParam("statename", "isOn")                             
                             .queryParam("from", queryStrDate)
                             .request()
-                            .header("Sendal3PSSId", scs3pssId)
                             .buildGet();
                 }
 
@@ -189,7 +213,7 @@ public class LightTrackerIntegrationService {
                                     .queryParam("timezone", timeZone)
                                     .queryParam("numberofminutes", "60")
                                     // no starttimer param means use the current time.
-                                    .request().header("Sendal3PSSId", scs3pssId).buildGet();
+                                    .request().buildGet();
                         }
 
                         try {
@@ -378,5 +402,68 @@ public class LightTrackerIntegrationService {
         }
 
         return totalMillis;
+    }
+
+    @POST
+    @Path("/anomalies/{deviceid}/ignore")
+    public Response anomalyIgnore(@Auth IDPrincipal principal, @PathParam("deviceid") ObjectId deviceId) {
+        Response response;
+
+        // try to get and lock the anomaly
+        try {
+            LightTrackerAnomaly anomaly = lightTrackerAnomalyDao.getLightTrackerAnomalyWithLock(deviceId);
+
+            if (anomaly != null) {
+                anomaly.setAnomalyIgnore(client, scsEndpoint, lightTrackerAnomalyDao);
+                // the setAnomalyIgnore call takes care of updating the database.
+
+                response = Response.ok().build();
+            } else {
+                response = Response.status(Status.NOT_FOUND).entity("Device report not found.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (OLockFailureException e) {
+            response = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Device could not be locked to ignore.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+
+        return response;
+    }
+
+    @GET
+    @Path("/anomalies")
+    public Response getActieAnomalies(@Auth IDPrincipal principal, @PathParam("homeid") ObjectId homeId) {
+        Response response;
+
+        LightTrackerSubscriptionRecord subRecord = lightTrackerSubscriptionRecordDao
+                .getHomeSubscription(homeId);
+        if (subRecord != null) {
+            // verify the home is subscribed.
+            List<LightTrackerAnomaly> anomalies = lightTrackerAnomalyDao.getHouseActiveAnomalies(homeId);
+            List<LightTrackerReportedAnomaly> reportedAnomalies = new ArrayList<LightTrackerReportedAnomaly>();
+            List<ExternalDeviceConfiguration> deviceConfigurations = subRecord.getHomeConfig().deviceConfigurations
+                    .get("lighting");
+
+            for (LightTrackerAnomaly anomaly : anomalies) {
+                String deviceName = "unknown";
+
+                for (ExternalDeviceConfiguration edc : deviceConfigurations) {
+                    if (edc.deviceId.equals(anomaly.getDeviceId().toString())) {
+                        deviceName = edc.deviceName;
+                        break; // from for loop
+                    }
+                }
+                LightTrackerReportedAnomaly amra = new LightTrackerReportedAnomaly(anomaly, deviceName);
+                reportedAnomalies.add(amra);
+            }
+
+            response = Response.ok(reportedAnomalies).build();
+        } else {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Home is not subscribed to the appliance monitor service.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+
+        return response;
     }
 }

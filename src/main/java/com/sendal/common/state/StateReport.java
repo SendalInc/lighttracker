@@ -1,8 +1,8 @@
-package com.sendal.common;
+package com.sendal.common.state;
 
 import java.io.Serializable;
-import com.sendal.common.StateValue;
-import com.sendal.common.StateIdentifier;
+import com.sendal.common.state.StateValue;
+import com.sendal.common.state.StateIdentifier;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

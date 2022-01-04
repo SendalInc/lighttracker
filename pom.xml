@@ -19,6 +19,11 @@
       <jackson.version>2.10.3</jackson.version>
       <mongojavadriver.version>3.12.2</mongojavadriver.version>
       <jjwt.version>0.10.5</jjwt.version>
+
+      <!-- testing -->
+      <jadler.version>1.3.0</jadler.version>
+      <mockito.version>2.7.20</mockito.version> <!-- 3.3.3-->
+      <powermock.version>1.7.0RC4</powermock.version> <!-- 2.0.5 -->
   </properties>
   <dependencies>
     <dependency>
@@ -50,6 +55,46 @@
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
       <version>1.26</version>
+    </dependency>
+    <!-- Test Dependencies -->
+       <dependency>
+        <groupId>net.jadler</groupId>
+        <artifactId>jadler-core</artifactId>
+        <version>${jadler.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>net.jadler</groupId>
+        <artifactId>jadler-jdk</artifactId>
+        <version>${jadler.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <!-- See : https://www.bountysource.com/issues/61158478-afterburner-class-generation-isn-t-compatible-with-powermock-1-7-0-causing-class-cast-exceptions
+         for why oddball versions are in use for mockito and powermock -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito2</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.powermock/powermock-api-mockito -->
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-testing</artifactId>
+      <version>${dropwizard.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <repositories>   

@@ -1,7 +1,10 @@
-package com.sendal.lighttracker;
+package com.sendal.common.pss;
 
+import javax.validation.constraints.Max;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.*;
+
 
 public class SendalSoftwareServiceConfiguration {
     @JsonProperty(required = true)

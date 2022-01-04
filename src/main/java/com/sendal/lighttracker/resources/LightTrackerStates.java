@@ -5,28 +5,46 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response;
 import javax.annotation.PostConstruct;
 import javax.validation.Validator;
 import javax.validation.ConstraintViolation;
 
-import com.sendal.common.StateIdentifier;
+import com.sendal.common.state.StateIdentifier;
+import com.sendal.common.state.StateValue;
 
+import io.dropwizard.auth.Auth;
+import org.bson.types.ObjectId;
+
+import io.dropwizard.client.JerseyClientBuilder;
+
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.HashSet;
+import java.io.InputStream;
 
-import com.sendal.lighttracker.db.LightTrackerAnomoly;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sendal.lighttracker.db.LightTrackerAnomaly;
 import com.sendal.lighttracker.db.LightTrackerSubscriptionRecord;
 import com.sendal.lighttracker.db.dao.LightTrackerSubscriptionRecordDAO;
-import com.sendal.lighttracker.db.dao.LightTrackerAnomolyDAO;
+import com.sendal.lighttracker.db.dao.LightTrackerAnomalyDAO;
+
+import com.sendal.common.coredb.DBPermissions;
+import com.sendal.common.state.StateReport;
 
 import com.sendal.externalapicommon.security.IDPrincipal;
-import io.dropwizard.auth.Auth;
 
-import com.sendal.common.StateReport;
-
+import com.sendal.externalapicommon.ExternalHomeConfiguration;
+import com.sendal.externalapicommon.ExternalDeviceConfiguration;
+import com.sendal.externalapicommon.ExternalRoomConfiguration;
 import com.codahale.metrics.annotation.*;
 
 @Timed
@@ -38,18 +56,18 @@ public class LightTrackerStates {
     private final Client client;
     private final Validator validator;
     private final LightTrackerSubscriptionRecordDAO lightTrackerSubscriptionRecordDao;
-    private final LightTrackerAnomolyDAO lightTrackerAnomolyDao;
+    private final LightTrackerAnomalyDAO lightTrackerAnomalyDao;
     private final String scsEndpoint;
     private final String scs3pssId;
     private final Logger logger = LoggerFactory.getLogger(LightTrackerStates.class);
 
-    public LightTrackerStates(Client client, LightTrackerSubscriptionRecordDAO lightTrackerSubscriptionRecordDao, LightTrackerAnomolyDAO lightTrackerAnomolyDao, String scsEndpoint, String scs3pssId, Validator validator) {
+    public LightTrackerStates(Client client, LightTrackerSubscriptionRecordDAO lightTrackerSubscriptionRecordDao, LightTrackerAnomalyDAO lightTrackerAnomalyDao, String scsEndpoint, String scs3pssId, Validator validator) {
         this.client = client;
         this.validator = validator;
         this.scsEndpoint = scsEndpoint;
         this.scs3pssId = scs3pssId;
         this.lightTrackerSubscriptionRecordDao = lightTrackerSubscriptionRecordDao;
-        this.lightTrackerAnomolyDao = lightTrackerAnomolyDao;
+        this.lightTrackerAnomalyDao = lightTrackerAnomalyDao;
     }
 
     @POST
@@ -71,7 +89,7 @@ public class LightTrackerStates {
             // check for a deviceState.
             if(updatedState.getStateIdentifier().getDevice() != null &&
                updatedState.getStateIdentifier().getStateName().equals("isOn")) {
-                LightTrackerAnomoly.lightStateUpdate(updatedState, lightTrackerAnomolyDao);
+                LightTrackerAnomaly.lightStateUpdate(updatedState, client, lightTrackerAnomalyDao, scsEndpoint);
            }
         }
 

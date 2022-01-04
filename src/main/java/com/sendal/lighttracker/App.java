@@ -39,8 +39,8 @@ import com.sendal.lighttracker.resources.LightTrackerDevelopmentPhaseClientAPIs;
 import com.sendal.lighttracker.resources.LightTrackerDevelopmentUIServer;
 import com.sendal.lighttracker.db.LightTrackerSubscriptionRecord;
 import com.sendal.lighttracker.db.dao.LightTrackerSubscriptionRecordDAO;
-import com.sendal.lighttracker.db.LightTrackerAnomoly;
-import com.sendal.lighttracker.db.dao.LightTrackerAnomolyDAO;
+import com.sendal.lighttracker.db.LightTrackerAnomaly;
+import com.sendal.lighttracker.db.dao.LightTrackerAnomalyDAO;
 import com.sendal.lighttracker.TimerEngine;
 
 import com.sendal.externalapicommon.security.ClientFilterSigner;
@@ -134,7 +134,7 @@ public class App extends Application<LightTrackerConfiguration>
                 
         LightTrackerSubscriptionRecordDAO lightTrackerSubscriptionRecordDao = new LightTrackerSubscriptionRecordDAO(
                 database);
-        LightTrackerAnomolyDAO lightTrackerAnomolyDao = new LightTrackerAnomolyDAO(database);
+        LightTrackerAnomalyDAO lightTrackerAnomalyDao = new LightTrackerAnomalyDAO(database);
 
         APISecurityAuthFilter apiSecurityAuthFilter = new APISecurityAuthFilter.Builder<IDPrincipal>()
                                             .setAuthenticator(new ApiSecretAuthenticatorDC(
@@ -150,11 +150,10 @@ public class App extends Application<LightTrackerConfiguration>
         e.jersey().register(new JsonProcessingExceptionMapper(true));
 
         e.jersey().register(new HealthResource());
-        e.jersey().register(new LightTrackerSubscription(client, lightTrackerSubscriptionRecordDao, c.getSendalSoftwareService().getScsUrl(), c.getSendalSoftwareService().getScs3pssId(),  e.getValidator()));
-        e.jersey().register(new LightTrackerStates(client, lightTrackerSubscriptionRecordDao, 
-                lightTrackerAnomolyDao, c.getSendalSoftwareService().getScsUrl(), c.getSendalSoftwareService().getScs3pssId(),  e.getValidator()));
+        e.jersey().register(new LightTrackerSubscription(client, lightTrackerSubscriptionRecordDao, lightTrackerAnomalyDao,  c.getSendalSoftwareService().getScsUrl(), c.getSendalSoftwareService().getScs3pssId(),  e.getValidator()));
+        e.jersey().register(new LightTrackerStates(client, lightTrackerSubscriptionRecordDao, lightTrackerAnomalyDao, c.getSendalSoftwareService().getScsUrl(), c.getSendalSoftwareService().getScs3pssId(),  e.getValidator()));
         
-        LightTrackerIntegrationService lightTrackerIntegrationService = new LightTrackerIntegrationService(client, lightTrackerSubscriptionRecordDao, c.getSendalSoftwareService().getScsUrl(), c.getSendalSoftwareService().getScs3pssId(), e.getValidator());
+        LightTrackerIntegrationService lightTrackerIntegrationService = new LightTrackerIntegrationService(client, lightTrackerSubscriptionRecordDao, lightTrackerAnomalyDao, c.getSendalSoftwareService().getScsUrl(), c.getSendalSoftwareService().getScs3pssId(), e.getValidator());
         e.jersey().register(lightTrackerIntegrationService);
         
         switch(c.getLightTrackerDeploymentPhase()) {
@@ -174,7 +173,7 @@ public class App extends Application<LightTrackerConfiguration>
                 break;
         }
             
-        e.lifecycle().manage(new TimerEngine(client, lightTrackerSubscriptionRecordDao, lightTrackerAnomolyDao, c));
+        e.lifecycle().manage(new TimerEngine(client, lightTrackerSubscriptionRecordDao, lightTrackerAnomalyDao, c));
     }
     
     public static void main( String[] args ) throws Exception {
