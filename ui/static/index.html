@@ -9,109 +9,52 @@
     <link rel="stylesheet" href="https://unpkg.com/react-select@1.2.1/dist/react-select.css">
     <style>     
         * {
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-          user-select: none;
           font-family: Verdana, Geneva, sans-serif;
         }
         :root {
-            --text-color:#3E4147;
-            --active-badge:#9D4618;
-            --button-pressed-highlight:#bcbcbc;
-            --background-color: #d4d4d4;
+            --text-color:#425e72;
+            --background-color: rgba(0,0,0,0);
         }
         body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
             background-color: var(--background-color);
         }
-        #close-image img {
-            display: block;
-            height: 25px;  
-            width: 20px;
+        .nav-item {
+            height: 6vh;
         }
-        #close-text {
-            font-size:25px;
-            color: var(--text-color);
-            width: 55px;
-        }
-        #status-text {
-            font-size:25px;
-            color: var(--text-color);
-        }
-        .Label {
-            font-weight: bold;
-            font-size: 16px;
-            color: var(--text-color);
-            text-align: left;
-            margin-left: 5%;
-            margin-top: 1em;
-            margin-bottom: 0.5em;
-        }
-        .PageHeader {
-            font-size: 30px;
-            color: var(--text-color);
-            text-align: center;
-            margin-top: 20px;
-        }
-       
-        .UsageSummaryDescription {
-            text-align: left;
-            border: none;
-        }
-        .UsageSummaryValue {
-            text-align: left;
-            border: none;
-        }
-        .UsageSummaryTable {
-          align: center;
-          margin-left: 3%;
-          margin-right: 10%;
-          width: 50%;
-        }
-        .PredictionTable {
-          align: center;
-          margin-left: 5%;
-          margin-right: 5%;
-        }
-        .LoadingSpinner {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            margin-top: -37px;
-            margin-left: -37px;
-        }
-        .ScopeTabs {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 10px;
-        }
-        
         .nav-link.active {
-            color: var(--background-color) !important;
+            color: white !important;
             background-color: var(--text-color) !important;
+            outline: none !important;
+            border: none !important;
         }
         .nav-link {
             color: var(--text-color);
-            background-color: var(--background-color);
-        }
-        .LightSeparator {
-            color: 'black';
-            height: 5px;
-            width: 94%;
+            background-color: white !important;
+            outline: none !important;
+            border: none;
+            padding-top: 0;
+            padding-bottom: 0;
         }
         .table>tbody>tr>td,
         .table>tbody>tr>th {
             border-top: none;
         }
-        
+        .table-sm>td {
+            padding: 0,
+        }
+        .tab-pane {
+            overflow-y:scroll;
+            height: 94vh;
+        }
         .tab-content.panel
         {
             border-top: none; 
             border-top-left-radius: 0px; 
             border-top-right-radius: 0px;
         }
-
     </style>
 </head>
 

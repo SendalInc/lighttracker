@@ -28,7 +28,8 @@ module.exports = {
                     chunks: 'all'
                 }
             }
-        }
+        },
+        nodeEnv: isDevelopment ? 'development' : 'none'
     },
     module: {
         rules: [
