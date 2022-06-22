@@ -17,7 +17,7 @@
       <!-- runtime -->
       <dropwizard.version>1.3.20</dropwizard.version>
       <jackson.version>2.10.3</jackson.version>
-      <mongojavadriver.version>3.12.2</mongojavadriver.version>
+      <mongojavadriver.version>3.12.8</mongojavadriver.version>
       <jjwt.version>0.10.5</jjwt.version>
   </properties>
   <dependencies>
